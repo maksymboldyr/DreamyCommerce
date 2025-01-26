@@ -1,3 +1,5 @@
+ <!-- TODO: fix returning to personal orders from admin panel. Look into creating shared component to be reusable between
+  admin panel and personal orders -->
 <p-button label="Back to Orders" routerLink="/account/order-history" class="mt-3"></p-button>
 <p-button *ngIf="order.status !== 'Cancelled'" label="Cancel Order" [severity]="'danger'"  (onClick)="cancelOrder()" class="m-3"></p-button>
 <div class="details-container">

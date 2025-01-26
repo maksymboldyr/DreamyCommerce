@@ -10,12 +10,12 @@ public class Address : BaseEntity
     /// <summary>
     /// Gets or sets the country name for address.
     /// </summary>
-    public string Country { get; set; }
+    public string? Country { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the region name for address.
     /// </summary>
-    public string Region { get; set; }
+    public string? Region { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the city name for address. Is required.
@@ -43,5 +43,5 @@ public class Address : BaseEntity
     /// <summary>
     /// Gets or sets the zip code for address.
     /// </summary>
-    public string ZipCode { get; set; }
+    public string? ZipCode { get; set; } = string.Empty;
 }

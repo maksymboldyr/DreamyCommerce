@@ -8,6 +8,11 @@ namespace DataAccess.Entities;
 /// </summary>
 public abstract class BaseEntity
 {
+    public BaseEntity()
+    {
+        CreatedAt = DateTime.UtcNow;
+    }
+
     /// <summary>
     /// Represents the GUID primary key of the entity in the database.
     /// </summary>
@@ -21,7 +26,7 @@ public abstract class BaseEntity
     /// </summary>
     [Required]
     [Column(TypeName = "datetime2")]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
 
     /// <summary>
     /// Represents the date and time when the entity was last updated in the database.

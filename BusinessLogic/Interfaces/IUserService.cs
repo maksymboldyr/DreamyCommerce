@@ -31,6 +31,13 @@ public interface IUserService
     Task<string> GetTokenByEmailAddressAsync(string email);
 
     /// <summary>
+    /// Refreshes the access token.
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    Task<string> RefreshTokenAsync(RefreshTokenDto token);
+
+    /// <summary>
     /// Gets filtered, ordered and paginated collection of <see cref="UserDto"/> objects and total count of users.
     /// </summary>
     /// <param name="filter"></param>

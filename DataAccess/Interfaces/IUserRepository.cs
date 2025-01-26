@@ -12,7 +12,7 @@ public interface IUserRepository
     /// </summary>
     /// <param name="user"></param>
     /// <returns><see langword="true"/> if the user was created successfully, otherwise <see langword="false"/>.</returns>
-    Task<bool> CreateUserAsync(User user);
+    Task<bool> CreateUserAsync(User user, string password);
 
     /// <summary>
     /// Gets a user entity by its ID.

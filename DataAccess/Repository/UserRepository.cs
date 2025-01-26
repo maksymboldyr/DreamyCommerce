@@ -16,9 +16,10 @@ public class UserRepository(UserManager<User> userManager, RoleManager<Role> rol
     /// </summary>
     /// <param name="user"></param>
     /// <returns><see langword="true"/> if the user was created successfully, otherwise <see langword="false"/>.</returns>
-    public async Task<bool> CreateUserAsync(User user)
+    public async Task<bool> CreateUserAsync(User user, string password)
     {
-        var result = await userManager.CreateAsync(user);
+        await userManager.CreateAsync(user);
+        var result = await userManager.AddPasswordAsync(user, password);
         return result.Succeeded;
     }
 

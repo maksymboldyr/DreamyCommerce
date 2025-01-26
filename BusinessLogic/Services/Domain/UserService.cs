@@ -44,9 +44,12 @@ public class UserService(
     /// <returns><see langword="true"/> if the user was created successfully, <see langword="false"/> otherwise.</returns>
     public async Task<bool> CreateUserAsync(RegistrationDto registrationDto)
     {
-        var user = registrationDto.Adapt<User>();
-        user.PasswordHash = userManager.PasswordHasher.HashPassword(user, registrationDto.Password);
-        return await userRepository.CreateUserAsync(user);
+        var user = new User
+        {
+            UserName = registrationDto.Email,
+            Email = registrationDto.Email,
+        };
+        return await userRepository.CreateUserAsync(user, registrationDto.Password);
     }
 
     /// <summary>

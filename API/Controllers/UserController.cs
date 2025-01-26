@@ -25,10 +25,33 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
             if (success)
             {
                 var token = await userService.GetTokenByEmailAddressAsync(loginDto.Email);
-                var response = new LoginResponseDto { Token = token };
+                var user = await userService.GetUserByEmailAsync(loginDto.Email);
+                var response = new LoginResponseDto { Token = token, RefreshToken = user.RefreshToken };
                 return Ok(response);
             }
             return BadRequest("Invalid credentials");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+    }
+
+    [HttpPost]
+    [Route("refresh-token")]
+    [AllowAnonymous]
+    public async Task<IActionResult> RefreshToken(RefreshTokenDto refreshTokenDto)
+    {
+        try
+        {
+            var token = await userService.RefreshTokenAsync(refreshTokenDto);
+            if (token != null)
+            {
+                var response = new LoginResponseDto { Token = token };
+                return Ok(response);
+            }
+            return BadRequest("Invalid token");
         }
         catch (Exception ex)
         {
@@ -60,6 +83,11 @@ public class UsersController(IUserService userService, ILogger<UsersController> 
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
+
+    [HttpPost]
+    [Route("reset-password")]
+    [AllowAnonymous]
+
 
     [HttpGet]
     [Route("get-user-data/{id}")]

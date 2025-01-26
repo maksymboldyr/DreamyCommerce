@@ -36,6 +36,11 @@ public class UserDto
     public string? Address { get; set; }
 
     /// <summary>
+    /// The user's refresh token.
+    /// </summary>
+    public string? RefreshToken { get; set; }
+
+    /// <summary>
     /// The user's roles.
     /// </summary>
     public IEnumerable<string>? Roles { get; set; }

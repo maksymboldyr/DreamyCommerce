@@ -9,4 +9,5 @@ public class LoginResponseDto
     /// Access token returned on successful login.
     /// </summary>
     public string Token { get; set; }
+    public string? RefreshToken { get; set; }
 }

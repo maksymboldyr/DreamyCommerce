@@ -22,6 +22,16 @@ public class User : IdentityUser
     public string? LastName { get; set; }
 
     /// <summary>
+    /// Refresh token for the user.
+    /// </summary>
+    public string? RefreshToken { get; set; }
+
+    /// <summary>
+    /// Expiry time for the refresh token.
+    /// </summary>
+    public DateTime RefreshTokenExpiryTime { get; set; }
+
+    /// <summary>
     /// Represents foreign key for the <seealso cref="Address"/>.
     /// </summary>
     [ForeignKey("Address")]

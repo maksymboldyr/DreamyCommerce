@@ -3,6 +3,7 @@ using BusinessLogic.DTO.Auth;
 using BusinessLogic.Interfaces;
 using DataAccess.Entities.Users;
 using DataAccess.Interfaces;
+using DataAccess.Repository;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace BusinessLogic.Services.Domain;
@@ -43,6 +45,7 @@ public class UserService(
     public async Task<bool> CreateUserAsync(RegistrationDto registrationDto)
     {
         var user = registrationDto.Adapt<User>();
+        user.PasswordHash = userManager.PasswordHasher.HashPassword(user, registrationDto.Password);
         return await userRepository.CreateUserAsync(user);
     }
 
@@ -77,8 +80,71 @@ public class UserService(
         {
             authClaims.Add(new Claim(ClaimTypes.Role, userRole));
         }
+
         string token = GenerateToken(authClaims);
+
+        user.RefreshToken = token;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        await userRepository.UpdateUserAsync(user);
+
         return token;
+    }
+
+    public async Task<string?> RefreshTokenAsync(RefreshTokenDto refreshTokenDto)
+    {
+        var principal = GetPrincipalFromExpiredToken(refreshTokenDto.Token);
+        if (principal == null)
+        {
+            return null;
+        }
+
+        var userId = principal.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        if (userId == null)
+        {
+            return null;
+        }
+
+        var user = await userRepository.GetUserByIdAsync(userId);
+        if (user == null || user.RefreshToken != refreshTokenDto.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+        {
+            return null;
+        }
+
+        var newToken = GenerateToken(principal.Claims);
+        user.RefreshToken = GenerateRefreshToken();
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // Set new refresh token expiry time
+        await userRepository.UpdateUserAsync(user);
+
+        return newToken;
+    }
+
+    private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
+    {
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = false,
+            ValidateIssuer = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"])),
+            ValidateLifetime = false
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+        if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+        {
+            throw new SecurityTokenException("Invalid token");
+        }
+
+        return principal;
+    }
+
+    private string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 
     /// <summary>
@@ -251,4 +317,6 @@ public class UserService(
     {
         return await userRepository.RemoveRole(editUserRolesDto.UserId, editUserRolesDto.RoleName);
     }
+
+
 }

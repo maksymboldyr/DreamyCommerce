@@ -17,12 +17,11 @@ import { Router } from '@angular/router';
 export class AuthService {
   api: string;
   http: HttpClient;
-  router : Router;
+  router: Router;
   currentUser: User | null = null;
   decodedUserToken: DecodedUserToken | null = null;
-  
 
-  constructor(http: HttpClient, router: Router) { 
+  constructor(http: HttpClient, router: Router) {
     this.api = environment.apiUrl;
     this.http = http;
     this.router = router;
@@ -37,16 +36,16 @@ export class AuthService {
       return '';
     }
     this.decodedUserToken = jwtDecode<DecodedUserToken>(this.accessToken);
-    return this.decodedUserToken.id;
+    return this.decodedUserToken ? this.decodedUserToken.id : '';
   }
 
-  hasRole(role: string) : boolean {
+  hasRole(role: string): boolean {
     if (!this.accessToken || this.accessToken === '') {
       return false;
     }
     this.decodedUserToken = jwtDecode<DecodedUserToken>(this.accessToken);
 
-    let tokenRole = this.decodedUserToken.role;
+    let tokenRole = this.decodedUserToken ? this.decodedUserToken.role : null;
 
     if (Array.isArray(tokenRole)) {
       return tokenRole.includes(role);
@@ -71,27 +70,29 @@ export class AuthService {
     );
   }
 
-  login(loginDto: LoginDto) : Observable<LoginResponseDTO>{
+  login(loginDto: LoginDto): Observable<LoginResponseDTO> {
     return this.http.post<LoginResponseDTO>(`${this.api}/Users/login`, loginDto)
       .pipe(map((res => {
         tokenSetter(res.token);
+        this.setRefreshToken(res.refreshToken);
         this.decodedUserToken = jwtDecode<DecodedUserToken>(res.token);
-        
+
         return res;
       }
     )));
   }
 
-  refreshToken() : Observable<LoginResponseDTO> {
-    const refreshToken = this.getRefreshTokenFromCookie();
-    return this.http.post<LoginResponseDTO>(`${this.api}/refresh-token`, { refreshToken })
+  refreshToken(): Observable<LoginResponseDTO> {
+    const refreshToken = this.getRefreshToken();
+    return this.http.post<LoginResponseDTO>(`${this.api}/Users/refresh-token`, { token: this.accessToken, refreshToken })
       .pipe(map((res => {
         tokenSetter(res.token);
+        this.setRefreshToken(res.refreshToken);
         return res;
       }
     )));
   }
-  
+
   isAuthenticated(): Observable<boolean> {
     if (!this.accessToken || this.accessToken === '') {
       return of(false);
@@ -102,6 +103,7 @@ export class AuthService {
 
   logout() {
     tokenSetter('');
+    this.setRefreshToken('');
     this.currentUser = null;
     this.decodedUserToken = null;
     this.router.navigate(['/home']);
@@ -111,7 +113,15 @@ export class AuthService {
     return this.http.post(`${this.api}/forgot-password`, { email });
   }
 
-  private getRefreshTokenFromCookie() : string | null {
+  private setRefreshToken(refreshToken: string | null) {
+    if (refreshToken) {
+      document.cookie = `refreshToken=${refreshToken}; path=/;`;
+    } else {
+      document.cookie = `refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    }
+  }
+
+  private getRefreshToken(): string | null {
     const cookie = document.cookie;
     const cookieArray = cookie.split('; ');
     for (const cookie of cookieArray) {
@@ -122,6 +132,4 @@ export class AuthService {
     }
     return null;
   }
-
-  
 }

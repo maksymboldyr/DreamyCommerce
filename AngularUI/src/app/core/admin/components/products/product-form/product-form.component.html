@@ -1,0 +1,46 @@
+<form (ngSubmit)="onSave()">
+  <div class="flex flex-column">
+    <label for="name" class="font-semibold w-6rem my-1">Name</label>
+    <input id="name" name="product" type="text" pInputText class="flex-auto" [(ngModel)]="product.name" required autofocus/>
+    <label for="description" class="font-semibold w-6rem my-1">Description</label>
+    <input id="description" name="description" type="text" pInputText class="flex-auto" [(ngModel)]="product.description" required/>
+    <label for="price" class="font-semibold w-6rem my-1">Price</label>
+    <input id="price" name="price" type="number" pInputText class="flex-auto" [(ngModel)]="product.price" required/>
+    <label for="stock" class="font-semibold w-6rem my-1">Stock</label>
+    <input id="stock" name="stock" type="number" pInputText class="flex-auto" [(ngModel)]="product.stock" required/>
+    <label for="discount" class="font-semibold w-6rem my-1">Discount</label>
+    <input id="discount" name="discount" type="number" pInputText class="flex-auto" [(ngModel)]="product.discount" required/>
+    <label for="category" class="font-semibold w-6rem mt-5 my-1">Category</label>
+    <p-dropdown id="category" name="category" placeholder="Select category" 
+      [options]="categories" 
+      [(ngModel)]="product.categoryId" 
+      optionValue="id"
+      optionLabel="name" 
+      styleClass="w-full" 
+      required
+      [filter]="true"
+      filterBy="name"
+      [virtualScroll]="true"
+      [virtualScrollItemSize]="38" 
+      appendTo="body"
+      (onChange)="onCategoryChange($event)"
+    ></p-dropdown>
+    <p-dropdown id="subcategory" name="subcategory" placeholder="Select subcategory"
+      [options]="filteredSubcategories"
+      [(ngModel)]="product.subcategoryId"
+      optionValue="id"
+      optionLabel="name"
+      styleClass="w-full"
+      required
+      [filter]="true"
+      filterBy="name"
+      [virtualScroll]="true"
+      [virtualScrollItemSize]="38"
+      appendTo="body"
+    ></p-dropdown>
+  </div>
+  <p-footer class="flex justify-content-end mt-3 gap-2">
+    <button type="button" pButton label="Cancel" icon="pi pi-times" severity="secondary" (click)="onCancel()"></button>
+    <button type="submit" pButton label="Save" icon="pi pi-check"></button>
+  </p-footer>
+</form>

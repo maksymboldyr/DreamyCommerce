@@ -55,6 +55,8 @@ export class ProductService {
               description: product.description,
               categoryId: product.categoryId,
               subcategoryId: product.subcategoryId,
+              subcategoryName: product.subcategoryName,
+              categoryName: product.categoryName,
               price: product.price,
               stock: product.stock,
               discount: product.discount,

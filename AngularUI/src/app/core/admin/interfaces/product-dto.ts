@@ -3,6 +3,7 @@ export interface ProductDto {
     name: string;
     description: string;
     categoryId: string;
+    categoryName?: string;
     subcategoryId: string;
     subcategoryName?: string;
     price: number;

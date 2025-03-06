@@ -56,6 +56,11 @@ public class ProductDto
     public float Discount { get; set; }
 
     /// <summary>
+    /// Product's tags with their values
+    /// </summary>
+    public Dictionary<string, string> Tags { get; set; } = new Dictionary<string, string>();
+
+    /// <summary>
     /// URL of the product's image
     /// </summary>
     public string? ImageUrl { get; set; }

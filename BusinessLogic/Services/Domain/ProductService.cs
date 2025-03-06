@@ -75,15 +75,21 @@ public class ProductService(
         var filteredProducts = await unitOfWork.ProductRepository.GetAsync(
             filter: filterExpression,
             orderBy: sortingExpression,
-            includeProperties: "Subcategory");
+            includeProperties: "Subcategory.Category");
 
         var result = filteredProducts
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Adapt<IEnumerable<ProductDto>>();
+            .Adapt<IEnumerable<ProductDto>>(TypeAdapterConfig<Product, ProductDto>.NewConfig()
+                .Map(dest => dest.CategoryName, src => src.Subcategory.Category.Name)
+                .Map(dest => dest.CategoryId, src => src.Subcategory.Category.Id)
+                .Map(dest => dest.SubcategoryName, src => src.Subcategory.Name)
+                .Map(dest => dest.SubcategoryId, src => src.Subcategory.Id).Config);
 
         return (result, filteredProducts.Count());
     }
+
+
 
     /// <summary>
     /// Updates a product.
